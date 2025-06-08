@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 // Include config file
 require_once "config.php";
 
@@ -8,6 +10,10 @@ $username_err = $email_err = $password_err = $confirm_password_err = "";
 
 // Processing form data when form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    // Debugging: Dump $_FILES array
+    var_dump($_FILES);
+    echo "<br>";
 
     // Validate username
     if (empty(trim($_POST["username"]))) {
@@ -111,8 +117,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             if (move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $upload_path)) {
                 $profile_picture = $upload_path;
+            } else {
+                echo "Error moving uploaded file. Error code: " . $_FILES["profile_picture"]["error"] . "<br>";
             }
+        } else {
+            echo "Invalid file type or size. Type: " . $_FILES["profile_picture"]["type"] . ", Size: " . $_FILES["profile_picture"]["size"] . "<br>";
         }
+    } else {
+        echo "Profile picture not uploaded or an error occurred. Error code: " . (isset($_FILES["profile_picture"]) ? $_FILES["profile_picture"]["error"] : "N/A") . "<br>";
     }
 
     // Get profile information
@@ -164,177 +176,341 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
+    <link rel="icon" href="./images/logo.png" type="image/png">
     <link rel="stylesheet" href="style.css">
     <style>
+        /* Profile Picture Size Variables - Adjust these values to change the size */
+        :root {
+            --profile-size: 120px;
+            /* Main profile picture size */
+            --edit-icon-size: 35px;
+            /* Edit icon size */
+            --edit-icon-offset: 30%;
+            /* How far the edit icon is offset */
+            --profile-border: 4px;
+            /* Border width */
+        }
+
         body {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #f4f4f4;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         .register-container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 70px 50px 30px 50px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 800px;
+            max-width: 90%;
             text-align: center;
+            position: relative;
+            padding-top: calc(var(--profile-size) / 2 + 50px);
+            /* Adjusted to match new profile position */
+            backdrop-filter: blur(10px);
+            margin: 20px;
         }
 
         .register-container h2 {
-            margin-bottom: 20px;
-            color: #333;
+            display: none;
+            /* Hide the h2 tag */
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             text-align: left;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
         }
 
-        .form-group input {
+        .form-group input,
+        .form-group textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 12px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
             box-sizing: border-box;
+            background-color: #fff;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
         }
 
         .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
             resize: vertical;
             min-height: 80px;
         }
 
         .form-group textarea:focus,
         .form-group input:focus {
-            border-color: #5b39ee;
+            border-color: #667eea;
             outline: none;
-            box-shadow: 0 0 5px rgba(91, 57, 238, 0.2);
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.2);
         }
 
         button {
             width: 100%;
-            padding: 10px;
-            background-color: #5b39ee;
-            color: white;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
             border: none;
-            border-radius: 4px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: 600;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
         }
 
         button:hover {
-            background-color: #4a2cdb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
 
         .link {
-            margin-top: 15px;
-            font-size: 0.9em;
+            margin-top: 20px;
+            font-size: 0.95em;
+            color: #666;
         }
 
         .link a {
-            color: #5b39ee;
+            color: #667eea;
             text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
         }
 
         .link a:hover {
-            text-decoration: underline;
+            color: #764ba2;
         }
 
         .help-block {
-            color: red;
-            font-size: 0.8em;
+            color: #dc3545;
+            font-size: 0.85em;
             margin-top: 5px;
-        }
-
-        .profile-picture-preview {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin: 10px auto;
             display: block;
-            border: 3px solid #5b39ee;
         }
 
         .profile-picture-upload {
             text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .profile-picture-upload label {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #5b39ee;
-            color: white;
-            border-radius: 5px;
+            position: absolute;
+            width: var(--profile-size);
+            height: var(--profile-size);
+            top: 2%;
+            /* Adjusted to move lower */
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            overflow: hidden;
             cursor: pointer;
-            transition: background-color 0.3s;
+            border-radius: 50%;
+            /* Ensure the container itself is a circle */
         }
 
-        .profile-picture-upload label:hover {
-            background-color: #4a2cdb;
+        .profile-picture-preview {
+            width: var(--profile-size);
+            height: var(--profile-size);
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+            border: var(--profile-border) solid #fff;
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .profile-picture-upload:hover .profile-picture-preview {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .edit-icon {
+            position: absolute;
+            bottom: 10px;
+            /* Adjusted to bring it further inside the circle */
+            right: 10px;
+            /* Adjusted to bring it further inside the circle */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            width: var(--edit-icon-size);
+            height: var(--edit-icon-size);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            /* Removed transform: translate to prevent clipping */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            border: none;
+            z-index: 11;
+        }
+
+        .edit-icon:hover {
+            transform: scale(1.1);
+            /* Adjusted transform for hover */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .edit-icon img {
+            width: calc(var(--edit-icon-size) * 0.45);
+            /* Icon size relative to container */
+            height: calc(var(--edit-icon-size) * 0.45);
+            filter: invert(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .edit-icon:hover img {
+            transform: rotate(15deg);
+        }
+
+        .profile-picture-upload::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .profile-picture-upload:hover::before {
+            opacity: 1;
         }
 
         .profile-picture-upload input[type="file"] {
             display: none;
+        }
+
+        /* Add a placeholder text for the profile picture */
+        .profile-picture-upload::after {
+            content: 'Click to upload photo';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.85em;
+            color: #666;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .profile-picture-upload:hover::after {
+            opacity: 1;
+        }
+
+        .form-content {
+            display: flex;
+            justify-content: space-between;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .left-column,
+        .right-column {
+            width: 48%;
+            /* Adjusted width to account for gap */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            :root {
+                --profile-size: 150px;
+                /* Smaller size on mobile */
+                --edit-icon-size: 40px;
+            }
+
+            .register-container {
+                width: 95%;
+                padding: 70px 30px 30px 30px;
+            }
+
+            .form-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .left-column,
+            .right-column {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            :root {
+                --profile-size: 120px;
+                /* Even smaller size on very small screens */
+                --edit-icon-size: 35px;
+            }
+
+            .register-container {
+                width: 100%;
+                padding: 70px 20px 30px 20px;
+                margin: 10px;
+            }
         }
     </style>
 </head>
 
 <body>
     <div class="register-container">
-        <h2>Register</h2>
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data">
             <div class="profile-picture-upload">
-                <img id="preview" src="placeholder.png" alt="Profile Picture Preview" class="profile-picture-preview">
-                <label for="profile_picture">Choose Profile Picture</label>
+                <img id="preview" src="./images/profile-preview.png" alt="Profile Picture Preview" class="profile-picture-preview">
+                <label for="profile_picture" class="edit-icon"><img src="./images/pencil.png" alt="Edit Icon"></label>
                 <input type="file" id="profile_picture" name="profile_picture" accept="image/*" onchange="previewImage(this)">
             </div>
-            <div class="form-group <?php echo (!empty($username_err)) ? 'has-error' : ''; ?>">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" value="<?php echo $username; ?>" required>
-                <span class="help-block"><?php echo $username_err; ?></span>
-            </div>
-            <div class="form-group <?php echo (!empty($email_err)) ? 'has-error' : ''; ?>">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" value="<?php echo $email; ?>" required>
-                <span class="help-block"><?php echo $email_err; ?></span>
-            </div>
-            <div class="form-group <?php echo (!empty($password_err)) ? 'has-error' : ''; ?>">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-                <span class="help-block"><?php echo $password_err; ?></span>
-            </div>
-            <div class="form-group <?php echo (!empty($confirm_password_err)) ? 'has-error' : ''; ?>">
-                <label for="confirm_password">Confirm Password</label>
-                <input type="password" id="confirm_password" name="confirm_password" required>
-                <span class="help-block"><?php echo $confirm_password_err; ?></span>
-            </div>
-            <div class="form-group">
-                <label for="full_name">Full Name</label>
-                <input type="text" id="full_name" name="full_name" value="<?php echo $full_name; ?>">
-            </div>
-            <div class="form-group">
-                <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone" value="<?php echo $phone; ?>">
-            </div>
-            <div class="form-group">
-                <label for="address">Address</label>
-                <textarea id="address" name="address" rows="2"><?php echo $address; ?></textarea>
+            <div class="form-content">
+                <div class="left-column">
+                    <div class="form-group <?php echo (!empty($username_err)) ? 'has-error' : ''; ?>">
+                        <label for="username">User name</label>
+                        <input type="text" id="username" name="username" value="<?php echo $username; ?>" required>
+                        <span class="help-block"><?php echo $username_err; ?></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="full_name">full name</label>
+                        <input type="text" id="full_name" name="full_name" value="<?php echo $full_name; ?>">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" value="<?php echo $phone; ?>">
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" name="address" rows="2"><?php echo $address; ?></textarea>
+                    </div>
+                </div>
+                <div class="right-column">
+                    <div class="form-group <?php echo (!empty($email_err)) ? 'has-error' : ''; ?>">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" value="<?php echo $email; ?>" required>
+                        <span class="help-block"><?php echo $email_err; ?></span>
+                    </div>
+                    <div class="form-group <?php echo (!empty($password_err)) ? 'has-error' : ''; ?>">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                        <span class="help-block"><?php echo $password_err; ?></span>
+                    </div>
+                    <div class="form-group <?php echo (!empty($confirm_password_err)) ? 'has-error' : ''; ?>">
+                        <label for="confirm_password">Confirm Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required>
+                        <span class="help-block"><?php echo $confirm_password_err; ?></span>
+                    </div>
+                </div>
             </div>
             <button type="submit">Register</button>
         </form>

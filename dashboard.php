@@ -172,6 +172,7 @@ mysqli_close($link);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Manager - Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="./images/logo.png" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -1052,7 +1053,7 @@ mysqli_close($link);
                         <div class="dropdown">
                             <ul>
                                 <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
-                                <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+                                <li><a href="settings.php"><i class="fas fa-cog"></i> Settings</a></li>
                                 <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Log out</a></li>
                             </ul>
                         </div>
@@ -1294,13 +1295,7 @@ mysqli_close($link);
                             // Update badge count
                             const unreadCount = data.unread_count || 0;
                             notificationBadge.textContent = unreadCount;
-
-                            // Show/hide badge based on count
-                            if (unreadCount > 0) {
-                                notificationBadge.style.display = 'block';
-                            } else {
-                                notificationBadge.style.display = 'none';
-                            }
+                            notificationBadge.style.display = unreadCount > 0 ? 'block' : 'none';
 
                             // Display notifications in sidebar
                             sidebarContent.innerHTML = ''; // Clear previous content
@@ -1341,60 +1336,31 @@ mysqli_close($link);
                     });
             }
 
-            // Fetch notifications on page load (to update badge)
+            // Function to get notification icon based on type
+            function getNotificationIcon(type) {
+                switch (type) {
+                    case 'upcoming_deadline':
+                        return 'fa-clock';
+                    case 'overdue':
+                        return 'fa-exclamation-circle';
+                    case 'completed':
+                        return 'fa-check-circle';
+                    default:
+                        return 'fa-bell';
+                }
+            }
+
+            // Fetch notifications on page load
             fetchAndDisplayNotifications();
 
-            // Periodically fetch notifications (e.g., every 60 seconds)
+            // Periodically fetch notifications (every 60 seconds)
             setInterval(fetchAndDisplayNotifications, 60000);
-
-            // Toggle sidebar visibility
-            notificationIcon.addEventListener('click', function() {
-                notificationSidebar.classList.toggle('open');
-                if (notificationSidebar.classList.contains('open')) {
-                    // Fetch notifications when sidebar is opened
-                    fetchAndDisplayNotifications();
-                }
-            });
-
-            // Close sidebar
-            closeSidebarBtn.addEventListener('click', function() {
-                notificationSidebar.classList.remove('open');
-            });
-
-            // Close sidebar when clicking outside (optional, but good UX)
-            window.addEventListener('click', function(event) {
-                if (!notificationSidebar.contains(event.target) && !notificationIcon.contains(event.target) && notificationSidebar.classList.contains('open')) {
-                    notificationSidebar.classList.remove('open');
-                }
-            });
-
-            // Close notification preview modal
-            closeNotificationPreviewModalBtn.addEventListener('click', function() {
-                notificationPreviewModal.style.display = 'none';
-            });
-
-            // Close modal when clicking outside
-            window.addEventListener('click', function(event) {
-                if (event.target == notificationPreviewModal) {
-                    notificationPreviewModal.style.display = 'none';
-                }
-            });
 
             // Add click handler for notification items
             sidebarContent.addEventListener('click', function(event) {
                 const notificationItem = event.target.closest('.notification-item');
                 if (notificationItem) {
                     const notification = JSON.parse(notificationItem.dataset.notification);
-
-                    // Update modal content
-                    document.getElementById('notificationPreviewTitle').textContent =
-                        notification.type.replace('_', ' ').toUpperCase();
-                    notificationPreviewType.textContent = notification.type.replace('_', ' ');
-                    notificationPreviewTime.textContent = new Date(notification.created_at).toLocaleString();
-                    notificationPreviewMessage.textContent = notification.message;
-
-                    // Show the modal
-                    notificationPreviewModal.style.display = 'flex';
 
                     // Mark notification as read
                     if (!notification.is_read) {
@@ -1421,61 +1387,30 @@ mysqli_close($link);
                             .catch(error => console.error('Error marking notification as read:', error));
                     }
                 }
-            });
 
-            // Task Analysis Chart
-            const taskStatusData = {
-                completed: <?php echo $stats['completed_tasks']; ?>,
-                pending: <?php echo $stats['pending_tasks']; ?>,
-                inProgress: <?php echo $stats['in_progress_tasks']; ?>,
-                overdue: <?php echo $stats['overdue_tasks']; ?>
-            };
+                // Handle delete notification
+                const deleteButton = event.target.closest('.delete-notification');
+                if (deleteButton) {
+                    const notificationId = deleteButton.dataset.notificationId;
+                    const notificationItem = deleteButton.closest('.notification-item');
 
-            const ctx = document.getElementById('taskAnalysisChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Completed', 'Pending', 'In Progress', 'Overdue'],
-                    datasets: [{
-                        data: [
-                            taskStatusData.completed,
-                            taskStatusData.pending,
-                            taskStatusData.inProgress,
-                            taskStatusData.overdue
-                        ],
-                        backgroundColor: [
-                            '#2ecc71', // Completed - Green
-                            '#f1c40f', // Pending - Yellow
-                            '#3498db', // In Progress - Blue
-                            '#e74c3c' // Overdue - Red
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Task Status Distribution',
-                            font: {
-                                size: 16
+                    fetch('delete_notification.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
                             },
-                            padding: {
-                                bottom: 20
+                            body: `notification_id=${notificationId}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                notificationItem.remove();
+                                // Update unread count
+                                notificationBadge.textContent = data.unread_count;
+                                notificationBadge.style.display = data.unread_count > 0 ? 'block' : 'none';
                             }
-                        }
-                    }
+                        })
+                        .catch(error => console.error('Error deleting notification:', error));
                 }
             });
 
@@ -1497,26 +1432,40 @@ mysqli_close($link);
                 }
             });
 
-            // Prevent dropdown from closing when clicking inside it
-            dropdown.addEventListener('click', function(e) {
+            // Toggle sidebar visibility
+            notificationIcon.addEventListener('click', function(e) {
                 e.stopPropagation();
+                notificationSidebar.classList.toggle('open');
+                if (notificationSidebar.classList.contains('open')) {
+                    fetchAndDisplayNotifications();
+                }
+            });
+
+            // Close sidebar
+            closeSidebarBtn.addEventListener('click', function() {
+                notificationSidebar.classList.remove('open');
+            });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!notificationSidebar.contains(e.target) && !notificationIcon.contains(e.target) && notificationSidebar.classList.contains('open')) {
+                    notificationSidebar.classList.remove('open');
+                }
+            });
+
+            // Close notification preview modal
+            closeNotificationPreviewModalBtn.addEventListener('click', function() {
+                notificationPreviewModal.style.display = 'none';
+            });
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target == notificationPreviewModal) {
+                    notificationPreviewModal.style.display = 'none';
+                }
             });
 
         });
-
-        // Add this function before the DOMContentLoaded event listener
-        function getNotificationIcon(type) {
-            switch (type) {
-                case 'upcoming_deadline':
-                    return 'fa-clock';
-                case 'overdue':
-                    return 'fa-exclamation-circle';
-                case 'completed':
-                    return 'fa-check-circle';
-                default:
-                    return 'fa-bell';
-            }
-        }
     </script>
 </body>
 

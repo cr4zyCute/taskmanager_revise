@@ -39,6 +39,7 @@ mysqli_close($link);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Manager - Tasks</title>
+    <link rel="icon" href="./images/logo.png" type="image/png">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -646,7 +647,7 @@ mysqli_close($link);
                     <h2>Tasks</h2>
                 </div>
                 <div class="header-right">
-                    <div class="user-menu">
+                    <!-- <div class="user-menu">
                         <img src="<?php echo !empty($user_data['profile_picture']) ? htmlspecialchars($user_data['profile_picture']) : 'placeholder.png'; ?>" alt="User Avatar">
                         <div class="dropdown">
                             <ul>
@@ -655,7 +656,7 @@ mysqli_close($link);
                                 <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Log out</a></li>
                             </ul>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </header>
             <div class="tasks-container">

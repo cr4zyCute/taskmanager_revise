@@ -121,286 +121,195 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         mysqli_stmt_close($stmt);
     }
 }
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Manager - Edit Profile</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Edit Profile</title>
+    <link rel="icon" href="./images/logo.png" type="image/png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .container {
-            display: flex;
-            min-height: 100vh;
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .sidebar {
-            width: 250px;
-            background-color: #2c3e50;
-            color: white;
-            padding: 20px;
+        .profile-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
         }
 
-        .profile {
+        .profile-header {
             text-align: center;
-            padding: 20px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .profile img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin-bottom: 10px;
-            border: 3px solid #3498db;
-        }
-
-        .profile span {
-            display: block;
-            font-size: 1.1em;
-            margin-top: 10px;
-        }
-
-        .navigation ul {
-            list-style: none;
-            padding: 0;
-            margin: 20px 0;
-        }
-
-        .navigation li {
-            margin-bottom: 10px;
-        }
-
-        .navigation a {
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-
-        .navigation a:hover, .navigation li.active a {
-            background-color: #34495e;
-        }
-
-        .navigation i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-
-        .main-content {
-            flex: 1;
-            background-color: #f5f6fa;
-            padding: 20px;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 30px;
-            background-color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .user-menu {
-            display: flex;
-            align-items: center;
+        .profile-picture-container {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 20px;
             position: relative;
         }
 
-        .user-menu img {
+        .profile-picture {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #007bff;
+        }
+
+        .profile-picture-upload {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #007bff;
+            color: white;
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            margin-right: 10px;
-            cursor: pointer;
-        }
-
-        .dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background-color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-radius: 5px;
-            padding: 10px 0;
-            min-width: 150px;
-        }
-
-        .user-menu:hover .dropdown {
-            display: block;
-        }
-
-        .dropdown ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .dropdown li a {
             display: flex;
             align-items: center;
-            padding: 10px 20px;
-            color: #333;
-            text-decoration: none;
-            transition: background-color 0.3s;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .dropdown li a:hover {
-            background-color: #f5f6fa;
-        }
-
-        .dropdown i {
-            margin-right: 10px;
-            width: 20px;
-            text-align: center;
-        }
-
-        .edit-profile-form {
-            background-color: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            max-width: 800px;
-            margin: 0 auto;
+        .profile-picture-upload:hover {
+            background: #0056b3;
         }
 
         .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #2c3e50;
-            font-weight: 500;
+            margin-bottom: 25px;
         }
 
         .form-control {
-            width: 100%;
+            border-radius: 8px;
             padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            border: 1px solid #dee2e6;
         }
 
         .form-control:focus {
-            border-color: #3498db;
-            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-primary {
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .invalid-feedback {
-            color: #e74c3c;
-            font-size: 14px;
+            font-size: 0.875rem;
             margin-top: 5px;
         }
 
-        .profile-picture-preview {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            margin: 20px auto;
-            display: block;
-            object-fit: cover;
-            border: 3px solid #3498db;
+        .back-link {
+            color: #6c757d;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .btn-submit {
-            background-color: #3498db;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-
-        .btn-submit:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .form-actions {
-            text-align: center;
-            margin-top: 30px;
+        .back-link:hover {
+            color: #007bff;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <div class="sidebar">
-            <div class="profile">
-                <img src="<?php echo !empty($profile_picture) ? htmlspecialchars($profile_picture) : 'placeholder.png'; ?>" alt="User Profile">
-                <span><?php echo htmlspecialchars($full_name); ?></span>
+        <div class="profile-container">
+            <a href="profile.php" class="back-link">
+                <i class="fas fa-arrow-left me-2"></i> Back to Profile
+            </a>
+
+            <div class="profile-header">
+                <h2>Edit Profile</h2>
+                <p class="text-muted">Update your personal information</p>
             </div>
-            <nav class="navigation">
-                <ul>
-                    <li><a href="dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                    <li><a href="#"><i class="fas fa-tasks"></i> Tasks</a></li>
-                    <li><a href="#"><i class="fas fa-trash"></i> Trash</a></li>
-                </ul>
-            </nav>
-        </div>
-        <div class="main-content">
-            <header class="header">
-                <div class="header-left">
-                    <h2>Edit Profile</h2>
+
+            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data">
+                <div class="profile-picture-container">
+                    <img src="<?php echo !empty($profile_picture) ? htmlspecialchars($profile_picture) : 'assets/default-profile.png'; ?>"
+                        alt="Profile Picture"
+                        class="profile-picture"
+                        id="profile-preview">
+                    <label for="profile_picture" class="profile-picture-upload">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                    <input type="file"
+                        name="profile_picture"
+                        id="profile_picture"
+                        accept="image/*"
+                        style="display: none;"
+                        onchange="previewImage(this);">
                 </div>
-                <div class="header-right">
-                    <div class="user-menu">
-                        <img src="<?php echo !empty($profile_picture) ? htmlspecialchars($profile_picture) : 'placeholder.png'; ?>" alt="User Avatar">
-                        <div class="dropdown">
-                            <ul>
-                                <li><a href="profile.php"><i class="fas fa-user"></i> Profile</a></li>
-                                <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
-                                <li><a href="logout.php"><i class="fas fa-sign-out-alt"></i> Log out</a></li>
-                            </ul>
-                        </div>
-                    </div>
+
+                <div class="form-group">
+                    <label for="full_name" class="form-label">Full Name</label>
+                    <input type="text"
+                        name="full_name"
+                        id="full_name"
+                        class="form-control <?php echo (!empty($full_name_err)) ? 'is-invalid' : ''; ?>"
+                        value="<?php echo htmlspecialchars($full_name); ?>">
+                    <div class="invalid-feedback"><?php echo $full_name_err; ?></div>
                 </div>
-            </header>
-            <div class="edit-profile-form">
-                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label>Profile Picture</label>
-                        <img src="<?php echo !empty($profile_picture) ? htmlspecialchars($profile_picture) : 'placeholder.png'; ?>" alt="Profile Picture" class="profile-picture-preview">
-                        <input type="file" name="profile_picture" class="form-control" accept="image/*">
-                        <span class="invalid-feedback"><?php echo $profile_picture_err; ?></span>
-                    </div>
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" name="full_name" class="form-control <?php echo (!empty($full_name_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $full_name; ?>">
-                        <span class="invalid-feedback"><?php echo $full_name_err; ?></span>
-                    </div>
-                    <div class="form-group">
-                        <label>Phone Number</label>
-                        <input type="tel" name="phone" class="form-control <?php echo (!empty($phone_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $phone; ?>">
-                        <span class="invalid-feedback"><?php echo $phone_err; ?></span>
-                    </div>
-                    <div class="form-group">
-                        <label>Address</label>
-                        <textarea name="address" class="form-control <?php echo (!empty($address_err)) ? 'is-invalid' : ''; ?>" rows="3"><?php echo $address; ?></textarea>
-                        <span class="invalid-feedback"><?php echo $address_err; ?></span>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn-submit">Update Profile</button>
-                    </div>
-                </form>
-            </div>
+
+                <div class="form-group">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input type="tel"
+                        name="phone"
+                        id="phone"
+                        class="form-control <?php echo (!empty($phone_err)) ? 'is-invalid' : ''; ?>"
+                        value="<?php echo htmlspecialchars($phone); ?>">
+                    <div class="invalid-feedback"><?php echo $phone_err; ?></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address" class="form-label">Address</label>
+                    <textarea name="address"
+                        id="address"
+                        class="form-control <?php echo (!empty($address_err)) ? 'is-invalid' : ''; ?>"
+                        rows="3"><?php echo htmlspecialchars($address); ?></textarea>
+                    <div class="invalid-feedback"><?php echo $address_err; ?></div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profile-preview').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 </body>
+
 </html>

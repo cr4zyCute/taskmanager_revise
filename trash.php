@@ -39,6 +39,7 @@ mysqli_close($link);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Manager - Trash</title>
+    <link rel="icon" href="./images/logo.png" type="image/png">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -313,7 +314,7 @@ mysqli_close($link);
                 <div class="header-left">
                     <h2>Trash</h2>
                 </div>
-                <div class="header-right">
+                <!-- <div class="header-right">
                     <div class="user-menu">
                         <img src="<?php echo !empty($user_data['profile_picture']) ? htmlspecialchars($user_data['profile_picture']) : 'placeholder.png'; ?>" alt="User Avatar">
                         <div class="dropdown">
@@ -324,7 +325,7 @@ mysqli_close($link);
                             </ul>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </header>
             <div class="trash-container">
                 <div class="trash-header">
